@@ -16,13 +16,6 @@
 
 package jp.co.cyberagent.android.gpuimage.sample.activity;
 
-import jp.co.cyberagent.android.gpuimage.GPUImageFilter;
-import jp.co.cyberagent.android.gpuimage.GPUImageView;
-import jp.co.cyberagent.android.gpuimage.GPUImageView.OnPictureSavedListener;
-import jp.co.cyberagent.android.gpuimage.sample.GPUImageFilterTools;
-import jp.co.cyberagent.android.gpuimage.sample.GPUImageFilterTools.FilterAdjuster;
-import jp.co.cyberagent.android.gpuimage.sample.GPUImageFilterTools.OnGpuImageFilterChosenListener;
-import jp.co.cyberagent.android.gpuimage.sample.R;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -32,6 +25,15 @@ import android.view.View.OnClickListener;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Toast;
+
+import jp.co.cyberagent.android.gpuimage.GPUImageBrightnessFilter;
+import jp.co.cyberagent.android.gpuimage.GPUImageFilter;
+import jp.co.cyberagent.android.gpuimage.GPUImageView;
+import jp.co.cyberagent.android.gpuimage.GPUImageView.OnPictureSavedListener;
+import jp.co.cyberagent.android.gpuimage.sample.FilterNode;
+import jp.co.cyberagent.android.gpuimage.sample.FilterNodeGroup;
+import jp.co.cyberagent.android.gpuimage.sample.GPUImageFilterTools.FilterAdjuster;
+import jp.co.cyberagent.android.gpuimage.sample.R;
 
 public class ActivityGallery extends Activity implements OnSeekBarChangeListener,
         OnClickListener, OnPictureSavedListener {
@@ -77,15 +79,21 @@ public class ActivityGallery extends Activity implements OnSeekBarChangeListener
     public void onClick(final View v) {
         switch (v.getId()) {
             case R.id.button_choose_filter:
-                GPUImageFilterTools.showDialog(this, new OnGpuImageFilterChosenListener() {
+                GPUImageBrightnessFilter filter = new GPUImageBrightnessFilter();
+                FilterNode node = new FilterNode(filter);
+                filter.setBrightness(0.5f);
 
-                    @Override
-                    public void onGpuImageFilterChosenListener(final GPUImageFilter filter) {
-                        switchFilterTo(filter);
-                        mGPUImageView.requestRender();
-                    }
+                //FilterNode node2 = new FilterNode(new GPUImageSepiaFilter());
+                //node.addFirstTarget(node2);
 
-                });
+                FilterNodeGroup group = new FilterNodeGroup();
+                group.addNode(node);
+                //group.addNode(node2);
+                group.setInputNode(node);
+                group.setOutputNode(node);
+
+                switchFilterTo(group);
+                mGPUImageView.requestRender();
                 break;
             case R.id.button_save:
                 saveImage();
